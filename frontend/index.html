@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nourish | Recipe & Meal Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" onclick="switchTab('home')">
+                <i class="fa-solid fa-apple-whole logo-icon"></i>
+                <span>Nourish</span>
+            </a>
+            
+            <nav class="nav-menu" id="nav-links">
+                <a href="#" class="nav-link active" id="link-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="#" class="nav-link hidden-logged-out" id="link-recipes" onclick="switchTab('recipes')"><i class="fa-solid fa-book-open"></i> Recipes</a>
+                <a href="#" class="nav-link hidden-logged-out" id="link-planner" onclick="switchTab('planner')"><i class="fa-solid fa-calendar-week"></i> Weekly Planner</a>
+                <a href="#" class="nav-link hidden-logged-out" id="link-profile" onclick="switchTab('profile')"><i class="fa-solid fa-user-gear"></i> Profile</a>
+            </nav>
+
+            <div class="nav-auth">
+                <span class="user-badge hidden" id="user-badge">
+                    <i class="fa-solid fa-user-circle"></i>
+                    <span id="user-display-name">Username</span>
+                </span>
+                <button class="btn btn-primary" id="btn-login-redirect" onclick="switchTab('auth')"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+                <button class="btn btn-outline hidden" id="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="toast" id="toast"></div>
+
+        <!-- AUTH VIEW -->
+        <section id="view-auth" class="tab-view card-card" style="display: none;">
+            <div class="auth-box">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tab-login" onclick="toggleAuthView('login')">Sign In</button>
+                    <button class="auth-tab" id="tab-register" onclick="toggleAuthView('register')">Sign Up</button>
+                </div>
+
+                <form id="form-login" onsubmit="handleLoginSubmit(event)" class="auth-form">
+                    <h2>Welcome Back</h2>
+                    <p class="auth-subtitle">Log in to track recipes and coordinate meal slots.</p>
+                    <div class="form-group">
+                        <label for="login-username"><i class="fa-solid fa-user"></i> Username or Email</label>
+                        <input type="text" id="login-username" required placeholder="Enter username or email">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+
+                <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="auth-form hidden">
+                    <h2>Create Account</h2>
+                    <p class="auth-subtitle">Join us to start planning healthy habits.</p>
+                    <div class="form-group">
+                        <label for="reg-username"><i class="fa-solid fa-user"></i> Username</label>
+                        <input type="text" id="reg-username" required placeholder="Choose a username" minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                        <input type="email" id="reg-email" required placeholder="you@domain.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+                        <input type="password" id="reg-password" required placeholder="Min 6 characters" minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- HOME / DASHBOARD VIEW -->
+        <section id="view-home" class="tab-view">
+            <div class="guest-hero card-card" id="guest-hero">
+                <div class="hero-content">
+                    <h1>Nourish Your Body. Organize Your Meals.</h1>
+                    <p>Log custom recipes, monitor calorie & protein goals, and compile weekly slots in a simple, elegant meal manager.</p>
+                    <button class="btn btn-primary btn-lg" onclick="switchTab('auth')">Get Started Now <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="dashboard-content hidden" id="auth-dashboard">
+                <div class="dashboard-header">
+                    <h2>Daily Nutritional Target Status</h2>
+                    <span id="planner-week-indicator" class="week-pill">Active Week: Current</span>
+                </div>
+
+                <div class="grid-2">
+                    <div class="progress-card card-card">
+                        <div class="progress-title">
+                            <h3><i class="fa-solid fa-fire text-orange"></i> Calories</h3>
+                            <span id="cal-ratio">0 / 2000 kcal</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill bg-orange" id="cal-bar" style="width: 0%"></div>
+                        </div>
+                        <p class="progress-desc" id="cal-percentage">0% of daily target reached</p>
+                    </div>
+
+                    <div class="progress-card card-card">
+                        <div class="progress-title">
+                            <h3><i class="fa-solid fa-dumbbell text-green"></i> Protein</h3>
+                            <span id="prot-ratio">0g / 150g</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill bg-green" id="prot-bar" style="width: 0%"></div>
+                        </div>
+                        <p class="progress-desc" id="prot-percentage">0% of daily target reached</p>
+                    </div>
+                </div>
+
+                <div class="week-summary-row card-card">
+                    <h3>Weekly Average Totals</h3>
+                    <div class="metrics-row">
+                        <div class="metric-col">
+                            <span class="metric-val" id="week-avg-calories">0</span>
+                            <span class="metric-lbl">Avg kcal / Day</span>
+                        </div>
+                        <div class="metric-col border-left">
+                            <span class="metric-val" id="week-avg-protein">0g</span>
+                            <span class="metric-lbl">Avg Protein / Day</span>
+                        </div>
+                        <div class="metric-col border-left">
+                            <span class="metric-val" id="week-total-meals">0</span>
+                            <span class="metric-lbl">Meals Planned</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECIPES VIEW -->
+        <section id="view-recipes" class="tab-view" style="display: none;">
+            <div class="view-header">
+                <div>
+                    <h1>Recipes Directory</h1>
+                    <p>Browse existing nutrient cards or create your own custom recipes.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openRecipeForm()"><i class="fa-solid fa-plus"></i> Create Recipe</button>
+            </div>
+
+            <div class="recipes-layout">
+                <div class="search-panel card-card">
+                    <input type="text" id="recipe-search" placeholder="Search recipe name..." oninput="loadRecipes()">
+                    <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
+                </div>
+                <div class="grid-3" id="recipes-grid">
+                    <!-- Dynamic Recipe Cards -->
+                </div>
+            </div>
+        </section>
+
+        <!-- RECIPE DETAIL VIEW -->
+        <section id="view-recipe-detail" class="tab-view" style="display: none;">
+            <button class="btn btn-outline btn-sm margin-bottom" onclick="switchTab('recipes')"><i class="fa-solid fa-arrow-left"></i> Back to Recipes</button>
+            <div class="recipe-detail-card card-card" id="recipe-detail-container">
+                <!-- Dynamic detail loading -->
+            </div>
+        </section>
+
+        <!-- RECIPE FORM VIEW -->
+        <section id="view-recipe-form" class="tab-view" style="display: none;">
+            <div class="view-header">
+                <h1 id="recipe-form-title">Create New Recipe</h1>
+                <button class="btn btn-outline" onclick="switchTab('recipes')">Cancel</button>
+            </div>
+
+            <div class="recipe-form-card card-card">
+                <form id="form-recipe" onsubmit="handleRecipeFormSubmit(event)">
+                    <div class="form-group">
+                        <label for="recipe-title">Recipe Title</label>
+                        <input type="text" id="recipe-title" required placeholder="e.g. Garlic Herb Grilled Salmon">
+                    </div>
+                    <div class="form-group">
+                        <label for="recipe-desc">Short Description</label>
+                        <textarea id="recipe-desc" placeholder="Briefly describe this dish..."></textarea>
+                    </div>
+
+                    <div class="ingredients-builder-section">
+                        <h3>Ingredients List</h3>
+                        <p class="builder-desc">Add constituent ingredients and input weight portions in grams. Calories and protein compute automatically.</p>
+                        
+                        <div class="ingredient-picker-row">
+                            <div class="form-group col-5">
+                                <label for="picker-ing-select">Select Ingredient</label>
+                                <select id="picker-ing-select">
+                                    <!-- Dynamic elements -->
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="picker-ing-weight">Weight (g)</label>
+                                <input type="number" id="picker-ing-weight" placeholder="e.g. 150" min="1">
+                            </div>
+                            <div class="form-group col-3 flex-end">
+                                <button type="button" class="btn btn-outline btn-block" onclick="addIngredientToBuilder()"><i class="fa-solid fa-plus"></i> Add Item</button>
+                            </div>
+                        </div>
+
+                        <table class="builder-table">
+                            <thead>
+                                <tr>
+                                    <th>Ingredient</th>
+                                    <th>Amount</th>
+                                    <th>Est. Calories</th>
+                                    <th>Est. Protein</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="builder-items-body">
+                                <tr><td colspan="5" class="empty-builder">No ingredients added yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="instructions-builder-section">
+                        <h3>Instructions / Steps</h3>
+                        <div class="instruction-row">
+                            <input type="text" id="instruction-step-input" placeholder="Add preparation or cooking step...">
+                            <button type="button" class="btn btn-outline" onclick="addInstructionStep()"><i class="fa-solid fa-plus"></i> Add Step</button>
+                        </div>
+                        <ol class="instructions-ordered-list" id="instructions-builder-list">
+                            <!-- Dynamic list -->
+                        </ol>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block margin-top">Save Recipe Card</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- WEEKLY PLANNER VIEW -->
+        <section id="view-planner" class="tab-view" style="display: none;">
+            <div class="view-header">
+                <div>
+                    <h1>Weekly Meal Planner</h1>
+                    <p>Assign recipes to daily slots and coordinate week-wide caloric needs.</p>
+                </div>
+                <div class="week-picker">
+                    <button class="btn btn-outline btn-sm" onclick="changeWeek(-7)"><i class="fa-solid fa-chevron-left"></i> Previous Week</button>
+                    <span id="active-week-label">Week starting: YYYY-MM-DD</span>
+                    <button class="btn btn-outline btn-sm" onclick="changeWeek(7)">Next Week <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="planner-card card-card">
+                <div class="planner-grid-responsive">
+                    <table class="planner-table">
+                        <thead>
+                            <tr>
+                                <th>Slot / Day</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                                <th>Sunday</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planner-table-body">
+                            <!-- Monday-Sunday meal slot cells filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROFILE / GOALS VIEW -->
+        <section id="view-profile" class="tab-view" style="display: none;">
+            <div class="view-header">
+                <div>
+                    <h1>Profile Settings</h1>
+                    <p>Configure nutritional targets and personal specifications.</p>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="profile-card card-card">
+                    <h2><i class="fa-solid fa-bullseye text-orange"></i> Edit Daily Goals</h2>
+                    <p class="profile-help">Set your daily target limits. Progress bars will evaluate actual plan inputs against these targets.</p>
+                    
+                    <form id="form-goals" onsubmit="handleGoalsSubmit(event)" class="margin-top">
+                        <div class="form-group">
+                            <label for="goal-calories">Daily Calories Target (kcal)</label>
+                            <input type="number" id="goal-calories" required min="500" max="10000" placeholder="e.g. 2000">
+                        </div>
+                        <div class="form-group">
+                            <label for="goal-protein">Daily Protein Target (grams)</label>
+                            <input type="number" id="goal-protein" required min="10" max="500" placeholder="e.g. 150">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Update Goals</button>
+                    </form>
+                </div>
+
+                <div class="profile-card card-card">
+                    <h2><i class="fa-solid fa-circle-plus text-green"></i> Add Custom Ingredient</h2>
+                    <p class="profile-help">Register new ingredients to the global database to use in customized recipe cards.</p>
+                    
+                    <form id="form-ingredient" onsubmit="handleIngredientSubmit(event)" class="margin-top">
+                        <div class="form-group">
+                            <label for="ing-name">Ingredient Name</label>
+                            <input type="text" id="ing-name" required placeholder="e.g. Sweet Potato">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="ing-calories">Calories (per 100g)</label>
+                                <input type="number" id="ing-calories" required step="0.1" min="0" placeholder="e.g. 86">
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="ing-protein">Protein (per 100g)</label>
+                                <input type="number" id="ing-protein" required step="0.1" min="0" placeholder="e.g. 1.6">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-outline btn-block">Add to Database</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="modal-slot">
+        <div class="modal-content card-card">
+            <div class="modal-header">
+                <h2>Add Recipe to Day</h2>
+                <button class="close-btn" onclick="closeModal('modal-slot')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="slot-modal-label">Choose recipe to add to Monday breakfast:</p>
+                <div class="form-group margin-top">
+                    <label for="slot-recipe-select">Select Recipe</label>
+                    <select id="slot-recipe-select">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="saveRecipeToSlot()">Confirm Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/app.js"></script>
+</body>
+</html>
