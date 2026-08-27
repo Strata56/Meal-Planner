@@ -37,21 +37,6 @@ recipe-meal-planner/
     └── app.js
 ```
 
-## Running the Application
-
-### 1. Database Requirement
-Ensure local MongoDB is running on your machine:
-*   Default connection string: `mongodb://localhost:27017`
-
-### 2. VS Code Launch (Recommended)
-1.  Open the folder `C:\Users\HP\OneDrive\Documents\Meal Planner` in VS Code.
-2.  Open the terminal (**Ctrl + `**) and install the requirements:
-    ```bash
-    pip install -r backend/requirements.txt
-    ```
-3.  Go to the **Run & Debug** sidebar tab (**Ctrl + Shift + D**), select **FastAPI: Meal Planner** from the dropdown, and press **F5**.
-4.  Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
-
 ### 3. Manual Terminal Startup
 If running directly from the command line:
 ```bash
