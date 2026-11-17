@@ -20,9 +20,13 @@ def get_db():
     return db_helper.db
 
 async def connect_to_mongo():
-    db_helper.client = AsyncIOMotorClient(MONGO_URI)
-    db_helper.db = db_helper.client[DB_NAME]
-    print(f"Connected to MongoDB: {DB_NAME}")
+    try:
+        db_helper.client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        db_helper.db = db_helper.client[DB_NAME]
+        await db_helper.client.admin.command('ping')
+        print(f"Connected to MongoDB: {DB_NAME}")
+    except Exception as e:
+        print(f"MongoDB connection notice: {e}")
 
 async def close_mongo_connection():
     if db_helper.client:
@@ -32,8 +36,11 @@ async def close_mongo_connection():
 async def create_indexes():
     db = db_helper.db
     if db is not None:
-        await db.users.create_index("username", unique=True)
-        await db.users.create_index("email", unique=True)
-        await db.ingredients.create_index("name", unique=True)
-        await db.meal_plans.create_index([("user_id", 1), ("week_start_date", 1)], unique=True)
-        print("MongoDB unique constraints and index rules applied.")
+        try:
+            await db.users.create_index("username", unique=True)
+            await db.users.create_index("email", unique=True)
+            await db.ingredients.create_index("name", unique=True)
+            await db.meal_plans.create_index([("user_id", 1), ("week_start_date", 1)], unique=True)
+            print("MongoDB unique constraints and index rules applied.")
+        except Exception as e:
+            print(f"Index creation notice: {e}")

@@ -1,4 +1,8 @@
-const API_BASE = window.location.origin.includes("8000") ? "" : "http://127.0.0.1:8000";
+// In production (Render) or when served by FastAPI, use relative URLs.
+// Only fallback to http://127.0.0.1:8000 if frontend is opened directly from file system or a separate dev server (e.g. port 5500).
+const API_BASE = (window.location.protocol === "file:" || ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && window.location.port !== "8000" && window.location.port !== ""))
+    ? "http://127.0.0.1:8000"
+    : "";
 
 const state = {
     token: localStorage.getItem("token") || null,
